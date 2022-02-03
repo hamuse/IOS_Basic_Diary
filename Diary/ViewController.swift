@@ -22,6 +22,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.configureCollectionView()
+        self.loadDiaryList()
     }
     
     private func configureCollectionView() {
@@ -61,10 +62,17 @@ class ViewController: UIViewController {
         //Any type으로 반환 되기 때문에 디셔너리 타입으로 타입 캐스팅 해줘야한다.
         guard let data = userDefaults.object(forKey: "diaryList") as? [[String: Any]] else { return }
         self.diaryList = data.compactMap {
-            guard let title = $0["title"] as? String else { return }
-            guard let contents = $0["contents"] as? String else { return }
-            
+            guard let title = $0["title"] as? String else { return nil }
+            guard let contents = $0["contents"] as? String else { return nil }
+            guard let date = $0["date"] as? Date else { return nil}
+            guard let isStar = $0["isStar"] as? Bool else { return nil}
+            return Diary(title: title, contents: contents, date: date, isStar: isStar)
         }
+        
+        //sort 정렬로 orderedDescending 내림 차순 정렬 (최신순 정렬)
+        self.diaryList = self.diaryList.sorted(by: {
+            $0.date.compare($1.date) == .orderedDescending
+        })
     }
     
     
@@ -104,6 +112,12 @@ extension ViewController: WriteDiaryViewDelegate {
     func didSelectRegister(diary: Diary) {
         self.diaryList.append(diary)
         self.collectionView.reloadData()
+        
+        //sort 정렬로 orderedDescending 내림 차순 정렬 (최신순 정렬)
+        self.diaryList = self.diaryList.sorted(by: {
+            $0.date.compare($1.date) == .orderedDescending
+        })
     }
+    
 }
 

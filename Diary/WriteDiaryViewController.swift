@@ -35,8 +35,7 @@ class WriteDiaryViewController: UIViewController {
     private func configureContentsTextView() {
         let borderColor = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 1.0) //alpha는 투명도 이다.
         self.contentsTextView.layer.borderColor = borderColor.cgColor //layer 관련 컬러를 설정할때는 UIColor가 아니라 cgColor로 설정 해야한다.
-        self.contentsTextView.layer.borderWidth = 0.5
-        self.contentsTextView.layer.cornerRadius = 5.0
+      
         
     }
     
