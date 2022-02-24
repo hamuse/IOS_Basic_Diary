@@ -34,13 +34,7 @@ class WriteDiaryViewController: UIViewController {
         self.configureDatePicker()
         self.configureInputField()
         self.configureEditMode()
-        self.createView()
         self.confirmButton.isEnabled = false // 버튼 비활성화
-    }
-    
-    private func createView() {
-        self.contentsTextView.layer.borderWidth = 1.0
-        self.contentsTextView.layer.borderColor = UIColor.black.cgColor
     }
     
     private func configureEditMode() {
@@ -51,6 +45,7 @@ class WriteDiaryViewController: UIViewController {
             self.dateTextField.text = self.dateToString(date: diary.date)
             self.diaryDate = diary.date
             self.confirmButton.title = "수정"
+            
         default:
             break
         }
@@ -68,8 +63,8 @@ class WriteDiaryViewController: UIViewController {
     private func configureContentsTextView() {
         let borderColor = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 1.0) //alpha는 투명도 이다.
         self.contentsTextView.layer.borderColor = borderColor.cgColor //layer 관련 컬러를 설정할때는 UIColor가 아니라 cgColor로 설정 해야한다.
-      
-        
+        self.contentsTextView.layer.borderWidth = 0.5
+        self.contentsTextView.layer.cornerRadius = 5.0
     }
     
     //데이트 피커 ->  데이터 값 설정
@@ -102,7 +97,7 @@ class WriteDiaryViewController: UIViewController {
         guard let date = self.diaryDate else { return }
         
         let diary = Diary(title: title, contents: contents, date: date, isStar: false)
-        
+        print("등록 버튼 클릭 \(self.diaryEditorMode)")
         switch self.diaryEditorMode {
         case .new:
             self.delegate?.didSelectRegister(diary: diary)
@@ -116,7 +111,7 @@ class WriteDiaryViewController: UIViewController {
             
         }
         
-        self.delegate?.didSelectRegister(diary: diary)
+//        self.delegate?.didSelectRegister(diary: diary)
         self.navigationController?.popViewController(animated: true)
         
     }

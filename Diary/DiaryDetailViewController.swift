@@ -9,6 +9,7 @@ import UIKit
 
 protocol DiaryDetailViewDelegate: AnyObject {
     func didSelectDelete(indexPath: IndexPath)
+    func didSelectStar(indexPath: IndexPath, isStar: Bool)
 }
 
 class DiaryDetailViewController: UIViewController {
@@ -82,8 +83,26 @@ class DiaryDetailViewController: UIViewController {
         self.navigationController?.popViewController(animated: true)
     }
     
+    //즐겨찾기 버튼 클릭시 작동
     @objc func tapStarButton() {
         
+        guard let isStar = self.diary?.isStar else { return }
+        guard let indexPath = self.indexPath else { return }
+        if isStar {
+            if #available(iOS 13.0, *) {
+                self.starButton?.image = UIImage(systemName: "star")
+            } else {
+                // Fallback on earlier versions
+            }
+        } else {
+            if #available(iOS 13.0, *) {
+                self.starButton?.image = UIImage(systemName: "star.fill")
+            } else {
+                // Fallback on earlier versions
+            }
+        }
+        self.diary?.isStar = !isStar
+        self.delegate?.didSelectStar(indexPath: indexPath, isStar: self.diary?.isStar ?? false)
     }
     
     deinit {
