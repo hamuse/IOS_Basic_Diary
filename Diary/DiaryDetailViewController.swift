@@ -7,10 +7,10 @@
 
 import UIKit
 
-protocol DiaryDetailViewDelegate: AnyObject {
-    func didSelectDelete(indexPath: IndexPath)
-    func didSelectStar(indexPath: IndexPath, isStar: Bool)
-}
+//protocol DiaryDetailViewDelegate: AnyObject {
+//    func didSelectDelete(indexPath: IndexPath)
+////    func didSelectStar(indexPath: IndexPath, isStar: Bool)
+//}
 
 class DiaryDetailViewController: UIViewController {
 
@@ -25,7 +25,7 @@ class DiaryDetailViewController: UIViewController {
     var starButton: UIBarButtonItem?
     
     //일기장 상세에서 삭제 눌렀을떄 필요한 요소
-    weak var delegate: DiaryDetailViewDelegate?
+//    weak var delegate: DiaryDetailViewDelegate?
     
     
     override func viewDidLoad() {
@@ -79,7 +79,12 @@ class DiaryDetailViewController: UIViewController {
     
     @IBAction func tapDeleteButton(_ sender: UIButton) {
         guard let indexPath = self.indexPath else { return }
-        self.delegate?.didSelectDelete(indexPath: indexPath)
+        NotificationCenter.default.post(
+            name: NSNotification.Name("deleteDiary"),
+            object: indexPath,
+            userInfo: nil
+        )
+//        self.delegate?.didSelectDelete(indexPath: indexPath)
         self.navigationController?.popViewController(animated: true)
     }
     
@@ -102,7 +107,9 @@ class DiaryDetailViewController: UIViewController {
             }
         }
         self.diary?.isStar = !isStar
-        self.delegate?.didSelectStar(indexPath: indexPath, isStar: self.diary?.isStar ?? false)
+        NotificationCenter.default.post(name: NSNotification.Name("starDiary"), object: ["isStar": self.diary?.isStar ?? false,
+                                                                                         "indexPath": indexPath], userInfo: nil)
+//        self.delegate?.didSelectStar(indexPath: indexPath, isStar: self.diary?.isStar ?? false)
     }
     
     deinit {
