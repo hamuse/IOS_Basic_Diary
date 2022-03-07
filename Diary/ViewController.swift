@@ -45,16 +45,24 @@ class ViewController: UIViewController {
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
     }
+    
+    
     @objc func deleteDiaryNotification(_ notification: Notification) {
-        guard let indexPath = notification.object as? IndexPath else { return }
-        self.diaryList.remove(at: indexPath.row)
-        self.collectionView.deleteItems(at: [indexPath])
+//        guard let indexPath = notification.object as? IndexPath else { return }
+        guard let uuidString = notification.object as? String else { return }
+        guard let index = self.diaryList.firstIndex(where: { $0.uuidString == uuidString }) else { return }
+//        self.diaryList.remove(at: indexPath.row)
+//        self.collectionView.deleteItems(at: [indexPath])
+        self.diaryList.remove(at: index)
+        self.collectionView.deleteItems(at: [IndexPath(row: index, section: 0)])
     }
     
     @objc func editDiaryNotification(_ notification: Notification) {
         guard let diary = notification.object as? Diary else { return }
-        guard let row = notification.userInfo?["indexPath.row"] as? Int else { return }
-        self.diaryList[row] = diary
+        guard let index = self.diaryList.firstIndex(where: { $0.uuidString == diary.uuidString }) else { return }
+//        guard let row = notification.userInfo?["indexPath.row"] as? Int else { return }
+//        self.diaryList[row] = diary
+        self.diaryList[index] = diary
         self.diaryList = self.diaryList.sorted(by: {
             $0.date.compare($1.date) == .orderedDescending
         })
@@ -64,8 +72,12 @@ class ViewController: UIViewController {
     @objc func starDiaryNotification(_ notification: Notification) {
         guard let starDiary = notification.object as? [String: Any] else { return }
         guard let isStar = starDiary["isStar"] as? Bool else { return }
-        guard let indexPath = starDiary["indexPath"] as? IndexPath else { return }
-        self.diaryList[indexPath.row].isStar = isStar
+        guard let uuidString = starDiary["uuidString"] as? String else { return }
+        guard let index = self.diaryList.firstIndex(where: { $0.uuidString == uuidString }) else { return }
+//        guard let indexPath = starDiary["indexPath"] as? IndexPath else { return }
+//        self.diaryList[indexPath.row].isStar = isStar
+        self.diaryList[index].isStar = isStar
+        
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -78,6 +90,7 @@ class ViewController: UIViewController {
     private func saveDiryList() {
         let date = self.diaryList.map {
             [
+                "uuidString": $0.uuidString,
                 "title": $0.title,
                 "contents": $0.contents,
                 "date": $0.date,
@@ -97,11 +110,12 @@ class ViewController: UIViewController {
         //Any type으로 반환 되기 때문에 디셔너리 타입으로 타입 캐스팅 해줘야한다.
         guard let data = userDefaults.object(forKey: "diaryList") as? [[String: Any]] else { return }
         self.diaryList = data.compactMap {
+            guard let uuidString = $0["uuidString"] as? String else { return nil }
             guard let title = $0["title"] as? String else { return nil }
             guard let contents = $0["contents"] as? String else { return nil }
             guard let date = $0["date"] as? Date else { return nil}
             guard let isStar = $0["isStar"] as? Bool else { return nil}
-            return Diary(title: title, contents: contents, date: date, isStar: isStar)
+            return Diary(uuidString: uuidString, title: title, contents: contents, date: date, isStar: isStar)
         }
         
         //sort 정렬로 orderedDescending 내림 차순 정렬 (최신순 정렬)
@@ -131,7 +145,7 @@ extension ViewController: UICollectionViewDataSource {
         let diary = self.diaryList[indexPath.row]
         cell.titleLabel.text = diary.title
         cell.dateLabel.text = self.dateToString(date: diary.date)
-        cell.layer.borderWidth = 1
+//        cell.layer.borderWidth = 1
         return cell
     }
 }
@@ -146,12 +160,13 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
 extension ViewController: WriteDiaryViewDelegate {
     func didSelectRegister(diary: Diary) {
         self.diaryList.append(diary)
-        self.collectionView.reloadData()
+     
         
         //sort 정렬로 orderedDescending 내림 차순 정렬 (최신순 정렬)
         self.diaryList = self.diaryList.sorted(by: {
             $0.date.compare($1.date) == .orderedDescending
         })
+        self.collectionView.reloadData()
     }
     
 }
